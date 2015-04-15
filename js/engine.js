@@ -91,10 +91,11 @@ var Engine = (function(global) {
      * render methods.
      */
     function updateEntities(dt) {
+       
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        
+         /*
         allPoop.forEach(function(poop) {
             if(poop.lifeSpan <= 0) {
                 poop = null;
@@ -106,7 +107,13 @@ var Engine = (function(global) {
         allGoodies.forEach(function(goodie) {
             goodie.update(dt);
         });
+        */
         
+        if( (Math.random() * 1000 < 10) ) {
+            aaa.activate();
+        }
+        ddd.update(dt);
+
         player.update();
     }
 
@@ -162,18 +169,25 @@ var Engine = (function(global) {
          * the render function you have defined.
          */
 
-        
+        /*
         allPoop.forEach(function(poop) {
             poop.render();
         });
 
-        allEnemies.forEach(function(enemy) {
-            enemy.render();
-        });
+
         
         allGoodies.forEach(function(goodie) {
             goodie.render();
         });
+        */
+        
+        allEnemies.forEach(function(enemy) {
+            enemy.render();
+        });
+        
+       ddd.render();
+        aaa.animate();
+                //ppp.render();
         player.render();
     }
 
@@ -206,4 +220,5 @@ var Engine = (function(global) {
      * from within their app.js files.
      */
     global.ctx = ctx;
+    console.log(global.ctx);
 })(this);

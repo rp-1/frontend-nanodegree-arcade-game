@@ -72,6 +72,98 @@ Poop.prototype.render = function() {
 }
 
 
+var Entity = function(type, sprite) {
+    this.type = type;
+    this.sprite = sprite;
+    this.id = -1;
+    this.reset();
+    
+    this.spawn = function() {
+        this.alive = true;
+        this.x = 100;
+        this.y = 100;
+        this.speed = 2;
+    }
+    
+}
+
+Entity.prototype.init = function(x,y,speed) {
+    this.x = x;
+    this.y = y;
+    this.speed = speed;
+}
+
+Entity.prototype.update = function(dt) {
+    this.x += this.speed * dt;
+    if(this.x > BLOCK_WIDTH * BLOCKS_HORIZONTAL) {
+        console.log("resetting entity " + this.id);
+        this.reset();
+    }
+}
+
+Entity.prototype.render = function() {
+    if(this.alive) {
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    }
+}
+
+Entity.prototype.reset = function() {
+    this.alive = false;
+    this.x = 0;
+    this.y = 0;
+    this.speed = 0;  
+    console.log("entity " + this.id + " is resset");
+}
+
+
+
+function Pool(type, sprite) {
+    var size = 5;
+    var pool = [];
+    
+    this.init = function() {
+        for(var i = 0; i < size; i++) {
+            var entity = new Entity(type, sprite);
+            entity.init(100, 100, 2);
+            entity.id = i + 1;
+            pool[i] = entity;
+        }
+    };
+    
+    this.activate = function() {
+        var none = false;
+        for(var i = 0; i < size; i++) {
+            if(!pool[i].alive) {
+                console.log("entity " + pool[i].id + " is not alive and should respawn");
+            } else {
+                console.log("entity " + pool[i].id + " is alive right now at " + pool[i].x + " " + pool[i].y);
+            }
+            
+            if(!pool[i].alive) {
+                none = true;
+                pool[i].spawn();
+                console.log("Found an available entity id is " + pool[i].id);
+                break;
+            }
+        }
+        if(none === false) {
+            console.log("there are no more available entities");
+        }
+        
+    }
+    this.animate = function() {
+        for(var i = 0; i < size; i++) {
+            if(pool[i].alive) {
+                pool[i].update(1);
+                pool[i].render();
+            }
+        }
+    };
+    
+    
+}
+
+
 // Enemies our player must avoid
 var Enemy = function() {
 
@@ -133,10 +225,12 @@ var Player = function() {
     this.sprite = 'images/char-boy.png';
     this.x = 3 * BLOCK_WIDTH;
     this.y = 3 * BLOCK_HEIGHT - GRASS_OFFSET;
+    console.log("Player created");
 }
 
 Player.prototype.update = function(dt) {
     var self = this;
+    /*
     allPoop.forEach(function(poop) {
         if(self.x < poop.x + 75 && self.x + 75> poop.x &&
           self.y < poop.y + 75 && self.y + 75 > poop.y) {
@@ -157,7 +251,7 @@ Player.prototype.update = function(dt) {
             console.log("COLLISION WITH " + goodie.type + " GOODIE!");
         }
     });
-        
+       */ 
 }
 
 Player.prototype.render = function() {
@@ -188,12 +282,27 @@ Player.prototype.handleInput = function(kCode) {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 
+/*
+var pool = new Pool();
+pool.init();
+pool.activate();
+pool.animate();
+console.log("context is " + window.ctx);
+*/
 
-var allEnemies = [new Enemy(), new Enemy(), new Enemy()];
+var ddd = new Enemy();
+//var ppp = new Entity("poop", "images/poop.png");
+//ppp.init(200,300,3);
+
+var aaa = new Pool("poop", "images/poop.png");
+aaa.init();
+aaa.activate();
+
+
+var allEnemies = [new Enemy()];
 var player = new Player();
 var allPoop = [];
-
-var allGoodies = [new Goodie('orange'), new Goodie('blue')];
+//var allGoodies = [];
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
