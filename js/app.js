@@ -1,13 +1,83 @@
+var BLOCK_WIDTH = 101;
+var BLOCK_HEIGHT = 83;
+var BLOCKS_VERTICAL = 6;
+var BLOCKS_HORIZONTAL = 5;
+var GRASS_OFFSET = 21;
+
+var Goodie = function(type) {
+    this.speed = 0;
+    this.type = type;
+    if(this.type === "orange") {
+        this.sprite = "images/Gem-Orange.png";
+        this.points = 500;
+    } else if(this.type === "blue") {
+        this.sprite = "images/Gem-Blue.png";
+        this.points = 100;
+    }
+
+    this.x = (Math.floor(Math.random() * BLOCKS_HORIZONTAL)) * BLOCK_WIDTH;
+    this.y = (Math.floor(Math.random() * BLOCKS_VERTICAL)) * BLOCK_HEIGHT - GRASS_OFFSET;
+    
+    
+}
+
+Goodie.prototype.update = function(dt) {
+    var me = this;
+    console.log("This.x is " + this.x);
+    allEnemies.forEach(function(enemy) {
+        if(me.x < enemy.x + 100 && me.x + 100 > enemy.x &&
+          me.y < enemy.y + 100 && me.y + 100 > enemy.y) {
+            console.log("A " + me.type + " collided with a beastie");
+            me.speed = enemy.speed;
+        }
+    });
+
+    me.x += me.speed * dt;
+  
+}   
+
+Goodie.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+}
+
+var Poop = function(x,y) {
+    this.sprite = "images/poop.png";
+    this.lifespan = 300;
+
+    this.x = x;
+    this.y = y;
+    this.opacity = 1.0;
+
+}
+
+Poop.prototype.update = function(dt) {
+    this.lifespan--;
+    if(this.lifespan <= 0) {
+        this.x = -100;
+    }
+}
+
+Poop.prototype.render = function() {
+    
+    if(this.lifespan < 5) {
+        this.opacity -= .1;
+        ctx.save();
+        ctx.globalAlpha=this.opacity;
+         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+         ctx.restore();
+    } else {
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    }
+
+}
+
+
 // Enemies our player must avoid
 var Enemy = function() {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
 
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
-    this.x = 200;
-    this.y = 200;
+    this.speed = 0;
+    this.reset();
 }
 
 // Update the enemy's position, required method for game
@@ -16,6 +86,41 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
+
+    if(this.isPooping === false) {
+        this.x += this.speed * dt;
+        if( !this.hasPooped && (Math.random() * 1000 < 10) && (this.x % BLOCK_WIDTH < 10) )    {
+            this.poop();
+        }
+    } else {
+        this.poopCounter--;
+        if(this.poopCounter <= 0) {
+            this.isPooping = false;
+        }
+    }
+    
+    if(this.x > BLOCK_WIDTH * BLOCKS_HORIZONTAL) {
+        this.reset();
+    }
+    
+}
+
+Enemy.prototype.reset = function() {
+    this.x = Math.random() * -200;
+    this.y = Math.floor(Math.random() * 6) * BLOCK_HEIGHT - GRASS_OFFSET;
+ 
+    this.speed = 50;
+    this.hasPooped = false;
+    this.isPooping = false;
+    this.poopCounter = 100;
+    this.direction = 1;
+}
+
+Enemy.prototype.poop = function() {
+    this.poopCounter = 100;
+    this.isPooping = true;
+    this.hasPooped = true; // only one poop per run
+    allPoop.push(new Poop(this.x, this.y));
 }
 
 // Draw the enemy on the screen, required method for game
@@ -23,25 +128,59 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+// Our main player object
 var Player = function() {
     this.sprite = 'images/char-boy.png';
-    this.x = 100;
-    this.y = 100;
+    this.x = 3 * BLOCK_WIDTH;
+    this.y = 3 * BLOCK_HEIGHT - GRASS_OFFSET;
 }
 
 Player.prototype.update = function(dt) {
+    var self = this;
+    allPoop.forEach(function(poop) {
+        if(self.x < poop.x + 75 && self.x + 75> poop.x &&
+          self.y < poop.y + 75 && self.y + 75 > poop.y) {
+            console.log("STEPPED IN BUG SHIT!");
+        }
+    });
+       
+    allEnemies.forEach(function(enemy) {
+        if(self.x < enemy.x + 75 && self.x + 75> enemy.x &&
+          self.y < enemy.y + 75 && self.y + 75 > enemy.y) {
+            console.log("COLLISION WITH ENEMY");
+        }
+    });
     
+    allGoodies.forEach(function(goodie) {
+        if(self.x < goodie.x + 75 && self.x + 75> goodie.x &&
+          self.y < goodie.y + 75 && self.y + 75 > goodie.y) {
+            console.log("COLLISION WITH " + goodie.type + " GOODIE!");
+        }
+    });
+        
 }
 
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
 
-Player.prototype.handleInput = function(args) {
-    console.log("in Player.handleInput " + args);
+Player.prototype.handleInput = function(kCode) {
+    
+    switch(kCode) {
+        case 'left':
+            this.x -= BLOCK_WIDTH;
+            break;
+        case 'right':
+            this.x += BLOCK_WIDTH;
+            break;
+        case 'up':
+            this.y -= BLOCK_HEIGHT;
+            break;
+        case 'down':
+            this.y += BLOCK_HEIGHT;
+    }
+
+    this.render();
 }
 
 
@@ -49,11 +188,12 @@ Player.prototype.handleInput = function(args) {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 
-var testEnemy1 = new Enemy();
-var testEnemy2 = new Enemy();
-var allEnemies = [testEnemy1, testEnemy2];
-var player = new Player();
 
+var allEnemies = [new Enemy(), new Enemy(), new Enemy()];
+var player = new Player();
+var allPoop = [];
+
+var allGoodies = [new Goodie('orange'), new Goodie('blue')];
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
