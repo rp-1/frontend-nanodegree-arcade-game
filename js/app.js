@@ -1,11 +1,12 @@
-// The Entity object holds stationary objects, both friend
-// and foe, that live on screen for a time (set by the property
-// 'lifespan', and then fade off.
+/* The Entity object holds stationary objects, both friend
+*  and foe, that live on screen for a time (set by the property
+* 'lifespan'), and then fade off. Gems, poop, etc.
+*/
 var Entity = function(sprite, points) {
-    this.sprite = sprite;   // the image that will be drawn on screen
-    this.lifespan = 0;      // how long will object be visible on screen
-    this.points = points;   // how many points will player get upon collision
-    this.opacity = 1.0;     // needed to fade out object
+    this.sprite = sprite;   /* the image that will be drawn on screen */
+    this.lifespan = 0;      /* how long will object be visible on screen */
+    this.points = points;   /* how many points will player get upon collision */
+    this.opacity = 1.0;     /* needed to fade out object */
 }
 
 
@@ -24,13 +25,13 @@ Entity.prototype.update = function(dt) {
 }
 
 Entity.prototype.render = function() {
-    // Fade sprite when it's close to being removed from view
+    /* Fade sprite when it's close to being removed from view */
     if(this.lifespan < 5) {
         this.opacity -= .15;
-        ctx.save();     // save the default opacity before modifying it
+        ctx.save();     /* save the default opacity before modifying it */
         ctx.globalAlpha=this.opacity;
          ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-         ctx.restore(); // restore default opacity
+         ctx.restore(); /* restore default opacity */
     } else {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
@@ -46,12 +47,12 @@ Entity.prototype.reset = function() {
 var Enemy = function(row) {
     this.sprite = 'images/enemy-bug.png';
     this.speed = 0;
-    this.y = row;   // each bug gets their own row
+    this.y = row;   /* each bug gets their own row */
     this.reset();
 }
 
 
-// Reset bug to location offscreen, left, and a random y position
+/* Reset bug to location offscreen, left, and a random y position */
 Enemy.prototype.reset = function() {
     this.x = (Math.random() * -400) - 100;
     this.speed = bug_speed;
@@ -60,13 +61,14 @@ Enemy.prototype.reset = function() {
     this.poopCounter = 20;      // how long should bug pause while pooping
 }
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
+/* Update the enemy's position, required method for game
+*  Parameter: dt, a time delta between ticks
+*/
 Enemy.prototype.update = function(dt) {
 
     if(this.isPooping === false) {
         this.x += this.speed * dt;
-        // If bug has not pooped this run, randomly decide if it's that time.
+        /* If bug has not pooped this run, randomly decide if it's that time. */
         if( !this.hasPooped && (Math.random() * 1000 < 30) && 
            (this.x % BLOCK_WIDTH < 10) && this.x >= 0 )    {
             this.poop();
@@ -82,14 +84,13 @@ Enemy.prototype.update = function(dt) {
     if(this.x > BLOCK_WIDTH * BLOCKS_HORIZONTAL) {
         this.reset();
     }
-    
 }
 
 
 Enemy.prototype.poop = function() {
-
-    // Find available poop to use/reuse so we
-    // don't have to create these objects during game
+    /* Find available poop to use/reuse so we
+    * don't have to create these objects during game
+    */
     for(var i = 0; i < allPoop.length; i++) {
         if(allPoop[i].lifespan <= 0) {
             allPoop[i].spawn(this.x - 2, this.y, 200);
@@ -101,13 +102,13 @@ Enemy.prototype.poop = function() {
     }
 }
 
-// Draw the enemy on the screen, required method for game
+/* Draw the enemy on the screen, required method for game */
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 
 }
 
-// Our main player object
+/* Our main player object */
 var Player = function() {
     this.sprite = 'images/char-boy.png';
     this.startX = Math.floor(BLOCKS_HORIZONTAL / 2) * BLOCK_WIDTH;
@@ -123,7 +124,7 @@ Player.prototype.reset = function() {
 }
 
 Player.prototype.update = function(dt) {
-    // TODO: Add pop up images at point of impact to show points gained/lost
+    /* TODO: Add pop up images at point of impact to show points gained/lost */
     var enemy = isColliding(this.x, this.y, allEnemies);
     if(enemy) {
         gameMessage("Hit by a bug. Lose a life.");
@@ -167,8 +168,9 @@ Player.prototype.render = function() {
 
 Player.prototype.handleInput = function(kCode) {
     
-    // We want player on screen between games but he shouldn't
-    // be able to move.
+    /* We want player on screen between games but he shouldn't
+    * be able to move.
+    */
     if(!gameOn) {
         return;
     }
@@ -188,7 +190,7 @@ Player.prototype.handleInput = function(kCode) {
             break;
         case 'up':
             this.y -= BLOCK_HEIGHT;
-            // if bug is on top water tile, kill him
+            /* if bug is on top water tile, kill him */
             if(this.y <= 0) {
                 this.lives -= 1;
                 this.reset();
@@ -208,9 +210,10 @@ Player.prototype.handleInput = function(kCode) {
 }
 
 
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
+/* Now instantiate your objects.
+* Place all enemy objects in an array called allEnemies
+* Place the player object in a variable called player
+*/
 
 var BLOCK_WIDTH = 101;
 var BLOCK_HEIGHT = 83;
@@ -218,12 +221,13 @@ var BLOCKS_VERTICAL = 6;
 var BLOCKS_HORIZONTAL = 5;
 var GRASS_OFFSET = 21;
 var COLLISION_PADDING = 50;
+var GAME_TIME = 46000;
 
 var bug_speed = 150;
 
-var gameOn = false;     // main switch for game play
+var gameOn = false;     /* main switch for game play */
 
-// html variables to control score display above canvas
+/* html variables to control score display above canvas */
 var scoreDiv = document.getElementById("score");
 var timeDiv = document.getElementById("time");
 var livesDiv = document.getElementById("lives");
@@ -236,7 +240,7 @@ for(var i = 0; i < 3; i++) {
     allEnemies.push(e);
 }
 
-// each colored gem has different point value associated with it
+/* each colored gem has different point value associated with it */
 var blueGem = new Entity("images/Gem-Blue.png", 50);
 var greenGem = new Entity("images/Gem-Green.png", 75);
 var orangeGem = new Entity("images/Gem-Orange.png", 100);
@@ -251,11 +255,12 @@ for(var i = 0; i < 6; i++) {
 }
 
 var player = new Player();
-var gameTimer = createTimer(45000);
+var gameTimer = null;
 
 
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
+/* This listens for key presses and sends the keys to your
+* Player.handleInput() method. You don't need to modify this.
+*/
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
         37: 'left',
@@ -268,18 +273,18 @@ document.addEventListener('keyup', function(e) {
     player.handleInput(allowedKeys[e.keyCode]);
 });
 
-// Stop play. Wait for mouse click to restart a game
+/* Stop play. Wait for mouse click to restart a game */
 function gameOver() {
     gameOn = false;
     gameMessage("Game Over! Click anywhere to play again!", player.score);
 
 }
 
-// Called once we receive mouse click to start another game
+/* Called once we receive mouse click to start another game */
 function gameReset() {
 
-    gameTimer = createTimer(45000); // 45 seconds countdown
-    timeDiv.style.color = "white";
+    gameTimer = createTimer(GAME_TIME); // start the game timer
+    timeDiv.style.color = "white";      // reset time color to white
     player.score = 0;
     player.lives = 3;
     player.reset();
@@ -297,15 +302,17 @@ function gameReset() {
     gameOn = true;
 }
 
-// Displays Message in black box on screen
-// If score param not passed, it will not be printed
+/* Displays Message in black box on screen
+*  If score param not passed, it will not be printed
+*/
 function gameMessage(text) {
     msgDiv.innerHTML = text;
 }
 
 
-// Takes x and y val of object and tests for collisions with all objects in arrayToCheck
-// Returns true if collision found
+/* Takes x and y val of object and tests for collisions with all objects in arrayToCheck
+*  Returns true if collision found
+*/
 function isColliding(x,y,arrayToCheck) {
     
     for(var i = 0; i < arrayToCheck.length; i++) {
@@ -318,7 +325,7 @@ function isColliding(x,y,arrayToCheck) {
     return false;
 }
 
-// Updates score, time, lives in html div above canvas
+/* Updates score, time, lives in html div above canvas */
 function updateDashboard() {
     scoreDiv.innerHTML = player.score;
     livesDiv.innerHTML = player.lives;
@@ -337,8 +344,10 @@ function updateDashboard() {
 }
 
 
-// Game timer counts down seconds until game over
-// Logic from http://stackoverflow.com/questions/19244394/creating-a-timer-for-a-javascript-game-gives-undesirable-results
+/* Game timer counts down seconds until game over. Logic from
+*  http://stackoverflow.com/questions/19244394/
+*  creating-a-timer-for-a-javascript-game-gives-undesirable-results
+*/
 
 function createTimer(timeLeft) {
     var startTime = Date.now();

@@ -21,7 +21,6 @@ var Engine = (function(global) {
     canvas.width = 505;
     canvas.height = 606;
     doc.body.appendChild(canvas);
-    var first_run = true;
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
@@ -62,7 +61,6 @@ var Engine = (function(global) {
         reset();
         lastTime = Date.now();
         main();
-
     }
 
     /* This function is called by main (our game loop) and itself calls all
@@ -75,10 +73,10 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
+        // Only update if we're playing a game
         if(gameOn) {
             updateEntities(dt);
         }
-
     }
 
     /* This is called by the update function  and loops through all of the
