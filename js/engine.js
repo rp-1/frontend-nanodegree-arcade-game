@@ -3,15 +3,8 @@
  * draws the initial game board on the screen, and then calls the update and
  * render methods on your player and enemy objects (defined in your app.js).
  *
- * A game engine works by drawing the entire game screen over and over, kind of
- * like a flipbook you may have created as a kid. When your player moves across
- * the screen, it may look like just that image/character is moving or being
- * drawn but that is not the case. What's really happening is the entire "scene"
- * is being drawn over and over, presenting the illusion of animation.
- *
- * This engine is available globally via the Engine variable and it also makes
- * the canvas' context (ctx) object globally available to make writing app.js
- * a little simpler to work with.
+ * Royalty free poop graphic courtesy of http://www.clipartbest.com
+ * Resuable objects tutorial: http://blog.sklambert.com/html5-canvas-game-the-enemy-ships/
  */
 
 var Engine = (function(global) {
@@ -28,6 +21,7 @@ var Engine = (function(global) {
     canvas.width = 505;
     canvas.height = 606;
     doc.body.appendChild(canvas);
+    var first_run = true;
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
@@ -39,8 +33,9 @@ var Engine = (function(global) {
          * would be the same for everyone (regardless of how fast their
          * computer is) - hurray time!
          */
+        
         var now = Date.now(),
-            dt = (now - lastTime) / 1000.0;
+        dt = (now - lastTime) / 1000.0;
 
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
@@ -67,6 +62,7 @@ var Engine = (function(global) {
         reset();
         lastTime = Date.now();
         main();
+
     }
 
     /* This function is called by main (our game loop) and itself calls all
@@ -79,8 +75,10 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
-        updateEntities(dt);
-        // checkCollisions();
+        if(gameOn) {
+            updateEntities(dt);
+        }
+
     }
 
     /* This is called by the update function  and loops through all of the
@@ -95,25 +93,43 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-         /*
+
         allPoop.forEach(function(poop) {
-            if(poop.lifeSpan <= 0) {
-                poop = null;
-            } else {
+            if(poop.lifespan >= 0 ) {
                 poop.update(dt);
             }
         });
-        
-        allGoodies.forEach(function(goodie) {
-            goodie.update(dt);
-        });
-        */
-        
-        if( (Math.random() * 1000 < 10) ) {
-            aaa.activate();
-        }
-        ddd.update(dt);
+                        
+        // Spawn a gem
+        if(Math.random() * 1000 < 30 && allGems.length > 0) {
+            var isEmpty = true;
+            for(var i = 0; i < allGems.length; i++) {
+                if(allGems[i].lifespan > 0) {
+                    isEmpty = false;
+                    break;
+                } 
+            }
+            if(isEmpty) {
+                // No gems on screen. Now find a square that doesn't have poop on it.
+                var rand = Math.floor(Math.random() * allGems.length);
+                var xpos = Math.floor(Math.random() * 3) * BLOCK_WIDTH;
+                var ypos = (Math.floor(Math.random() * 3) + 1) * BLOCK_HEIGHT - GRASS_OFFSET;
+                while(isColliding(xpos, ypos, allPoop)) {
+                    console.log("Space checked is occupied at " + xpos + ", " + ypos);
+                    var xpos = Math.floor(Math.random() * 3) * BLOCK_WIDTH;
+                    var ypos = (Math.floor(Math.random() * 3) + 1) * BLOCK_HEIGHT - GRASS_OFFSET;
+                }
 
+                allGems[rand].spawn(xpos, ypos, 100);
+            }
+        }
+        
+        allGems.forEach(function(gem) {
+            if(gem.lifespan >= 0) {
+                gem.update(dt);
+            }
+        });
+        
         player.update();
     }
 
@@ -127,6 +143,7 @@ var Engine = (function(global) {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
+
         var rowImages = [
                 'images/water-block.png',   // Top row is water
                 'images/stone-block.png',   // Row 1 of 3 of stone
@@ -169,26 +186,31 @@ var Engine = (function(global) {
          * the render function you have defined.
          */
 
-        /*
+
         allPoop.forEach(function(poop) {
-            poop.render();
+            if(poop.lifespan > 0 ) {
+                poop.render();
+            }
+        });
+
+        allGems.forEach(function(gem) {
+            if(gem.lifespan > 0) {
+                gem.render();
+            }
         });
 
 
-        
-        allGoodies.forEach(function(goodie) {
-            goodie.render();
-        });
-        */
-        
         allEnemies.forEach(function(enemy) {
             enemy.render();
         });
-        
-       ddd.render();
-        aaa.animate();
-                //ppp.render();
+ 
+
         player.render();
+        
+        // Update score, time, lives left on panel above canvas
+
+        updateDashboard();
+
     }
 
     /* This function does nothing but it could have been a good place to
@@ -196,7 +218,7 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -211,14 +233,18 @@ var Engine = (function(global) {
         'images/char-boy.png',
         'images/poop.png',
         'images/Gem-Orange.png',
-        'images/Gem-Blue.png'
+        'images/Gem-Blue.png',
+        'images/Gem-Green.png'
     ]);
     Resources.onReady(init);
+
 
     /* Assign the canvas' context object to the global variable (the window
      * object when run in a browser) so that developer's can use it more easily
      * from within their app.js files.
      */
     global.ctx = ctx;
-    console.log(global.ctx);
+    global.canvas = canvas;
+
+
 })(this);

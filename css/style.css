@@ -1,3 +1,61 @@
+
+div {
+    box-sizing: border-box;
+}
+
 body {
     text-align: center;
+}
+
+#dashboard {
+    width: 505px;
+    margin: 0 auto;
+    padding: 5px 10px;
+    overflow: hidden;
+    background-color: #536BD5;
+    color: #ffffff;
+    font: 20px Helvetica, sans-serif;
+    margin-bottom: -40px;
+    border-radius: 5px;
+}
+
+.dash-section {
+    width: 33.3%;
+    float:left;
+}
+
+.dash-title {
+    width: 50%;
+    float: left;
+    text-align: right;
+    padding-right: 5px;
+}
+
+#lives {
+    width: 50%;
+    text-align: left;
+    float: left;
+}
+
+#time {
+    width: 50%;
+    text-align: left;
+    float: left;
+}
+
+#score {
+    width: 50%;
+    text-align: left;
+    float: left;
+}
+
+#dash-message {
+    width: 100%;
+    text-align:left;
+    font: 14px Helvetica, sans-serif;
+    text-align: center;
+}
+
+.clearfix {
+    clear: both;
 }
