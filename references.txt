@@ -1,0 +1,14 @@
+Resuable objects tutorial
+http://blog.sklambert.com/html5-canvas-game-the-enemy-ships/
+
+Game timer function discussion
+http://stackoverflow.com/questions/19244394/creating-a-timer-for-a-javascript-game-gives-undesirable-results
+
+Miscellaneous javascript reference
+http://www.w3schools.com/js/
+
+Udacity javascript and canvas courses
+http://udacity.com
+
+Free usage clip art for additional graphics
+Royalty free poop graphic courtesy of http://www.clipartbest.com

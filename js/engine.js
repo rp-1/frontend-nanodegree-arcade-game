@@ -4,7 +4,6 @@
  * render methods on your player and enemy objects (defined in your app.js).
  *
  * Royalty free poop graphic courtesy of http://www.clipartbest.com
- * Resuable objects tutorial: http://blog.sklambert.com/html5-canvas-game-the-enemy-ships/
  */
 
 var Engine = (function(global) {
